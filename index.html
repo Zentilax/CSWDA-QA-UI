@@ -197,30 +197,6 @@
       display: inline-block;
     }
 
-    /* ── QA NOTICE ─────────────────────────────────────────── */
-    .qa-notice {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px 16px;
-      background: var(--red-faint);
-      border: 1px solid var(--border-red);
-      border-radius: 8px;
-      margin-bottom: 32px;
-      font-size: 13px;
-      color: var(--muted);
-      animation: fadeUp 0.6s ease 0.2s both;
-    }
-
-    .qa-notice .icon {
-      color: var(--red);
-      font-size: 16px;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .qa-notice strong { color: var(--text); }
-
     /* ── INPUT AREA ────────────────────────────────────────── */
     .input-section {
       animation: fadeUp 0.6s ease 0.3s both;
@@ -612,16 +588,6 @@
       </span>
     </div>
   </header>
-
-  <!-- ── QA NOTICE ───────────────────────────────────────── -->
-  <div class="qa-notice">
-    <span class="icon">ℹ</span>
-    <div>
-      <strong>This is a Question-Answering system, not a chatbot.</strong>
-      Each query is independent and processed against the connected knowledge bases.
-      Results include the knowledge sources used and latency for full transparency.
-    </div>
-  </div>
 
   <!-- ── INPUT ───────────────────────────────────────────── -->
   <div class="input-section">

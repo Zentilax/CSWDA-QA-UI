@@ -1,804 +1,650 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSWDA QA System — Telkom University</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
-  <style>
-    /* ── DESIGN TOKENS ─────────────────────────────────────── */
-    :root {
-      --red:       #E31937;   /* Telkom primary red */
-      --red-dark:  #B01028;
-      --red-glow:  rgba(227,25,55,0.18);
-      --red-faint: rgba(227,25,55,0.07);
-      --black:     #0D0D0D;
-      --surface:   #131313;
-      --card:      #1A1A1A;
-      --border:    rgba(255,255,255,0.07);
-      --border-red:rgba(227,25,55,0.3);
-      --text:      #F0EDE8;
-      --muted:     #888;
-      --mono:      'DM Mono', monospace;
-      --sans:      'DM Sans', sans-serif;
-      --display:   'Syne', sans-serif;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--black);
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 15px;
-      line-height: 1.6;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ── NOISE TEXTURE OVERLAY ─────────────────────────────── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
-    }
-
-    /* ── AMBIENT RED GLOW ──────────────────────────────────── */
-    .ambient {
-      position: fixed;
-      top: -30vh;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80vw;
-      height: 60vh;
-      background: radial-gradient(ellipse, rgba(227,25,55,0.12) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── LAYOUT ────────────────────────────────────────────── */
-    .shell {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 0 24px 80px;
-    }
-
-    /* ── HEADER ────────────────────────────────────────────── */
-    header {
-      padding: 48px 0 40px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 48px;
-      animation: fadeDown 0.7s ease both;
-    }
-
-    .header-top {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .logo-mark {
-      width: 44px;
-      height: 44px;
-      background: var(--red);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      box-shadow: 0 0 24px var(--red-glow);
-    }
-
-    .logo-mark svg { width: 26px; height: 26px; fill: #fff; }
-
-    .institution-tag {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      color: var(--red);
-      text-transform: uppercase;
-    }
-
-    h1 {
-      font-family: var(--display);
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    h1 span { color: var(--red); }
-
-    .subtitle {
-      font-family: var(--sans);
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 300;
-      max-width: 580px;
-      line-height: 1.65;
-      margin-top: 10px;
-    }
-
-    /* ── DB PILLS ──────────────────────────────────────────── */
-    .db-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 20px;
-    }
-
-    .pill {
-      font-family: var(--mono);
-      font-size: 10.5px;
-      letter-spacing: 0.06em;
-      padding: 4px 10px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      background: var(--surface);
-      text-transform: uppercase;
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .pill.active {
-      border-color: var(--border-red);
-      color: var(--red);
-      background: var(--red-faint);
-    }
-
-    /* ── SPONSOR BADGE ─────────────────────────────────────── */
-    .sponsor-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 22px;
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
-      width: fit-content;
-    }
-
-    .sponsor-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .sponsor-name {
-      font-family: var(--display);
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .wikidata-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #3BB31F;
-      display: inline-block;
-    }
-
-    /* ── INPUT AREA ────────────────────────────────────────── */
-    .input-section {
-      animation: fadeUp 0.6s ease 0.3s both;
-    }
-
-    .input-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      display: block;
-    }
-
-    .input-wrap {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    textarea {
-      width: 100%;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 15px;
-      font-weight: 300;
-      line-height: 1.6;
-      padding: 16px 18px;
-      resize: none;
-      min-height: 96px;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    textarea::placeholder { color: #555; }
-
-    textarea:focus {
-      border-color: var(--border-red);
-      box-shadow: 0 0 0 3px var(--red-faint);
-    }
-
-    .input-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .char-count {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: #444;
-    }
-
-    button {
-      font-family: var(--display);
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      padding: 12px 28px;
-      background: var(--red);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(227,25,55,0.3);
-    }
-
-    button:hover:not(:disabled) {
-      background: var(--red-dark);
-      box-shadow: 0 4px 28px rgba(227,25,55,0.45);
-    }
-
-    button:active:not(:disabled) { transform: scale(0.98); }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .btn-icon { font-size: 16px; }
-
-    /* ── LOADING ────────────────────────────────────────────── */
-    .loading-state {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      padding: 48px 0;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .loading-state.visible { display: flex; }
-
-    .loader {
-      width: 40px;
-      height: 40px;
-      border: 2px solid var(--border);
-      border-top-color: var(--red);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    .loading-text {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-    }
-
-    .loading-step {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: #444;
-      letter-spacing: 0.06em;
-    }
-
-    /* ── RESULT CARD ───────────────────────────────────────── */
-    .result-card {
-      display: none;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      animation: fadeUp 0.5s ease both;
-      margin-top: 32px;
-    }
-
-    .result-card.visible { display: block; }
-
-    .result-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .result-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .meta-chips {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .meta-chip {
-      font-family: var(--mono);
-      font-size: 10.5px;
-      padding: 3px 9px;
-      border-radius: 4px;
-      letter-spacing: 0.05em;
-    }
-
-    .meta-chip.latency {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      color: #aaa;
-    }
-
-    .meta-chip.latency span { color: var(--text); font-weight: 500; }
-
-    .meta-chip.llm {
-      background: rgba(255,200,0,0.06);
-      border: 1px solid rgba(255,200,0,0.2);
-      color: #bba;
-    }
-
-    .meta-chip.llm span { color: #ffd966; }
-
-    /* ── KB USED TAGS ──────────────────────────────────────── */
-    .kb-used {
-      padding: 12px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: var(--black);
-    }
-
-    .kb-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      color: #555;
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
-
-    .kb-tag {
-      font-family: var(--mono);
-      font-size: 10.5px;
-      padding: 3px 10px;
-      border-radius: 4px;
-      letter-spacing: 0.04em;
-      border: 1px solid;
-    }
-
-    .kb-tag.MySQL       { color: #58a6ff; border-color: rgba(88,166,255,0.25); background: rgba(88,166,255,0.07); }
-    .kb-tag.FAISS       { color: #79c0ff; border-color: rgba(121,192,255,0.25); background: rgba(121,192,255,0.07); }
-    .kb-tag.InternalWikibase { color: #a371f7; border-color: rgba(163,113,247,0.25); background: rgba(163,113,247,0.07); }
-    .kb-tag.MongoDB     { color: #3bb31f; border-color: rgba(59,179,31,0.25); background: rgba(59,179,31,0.07); }
-    .kb-tag.Wikidata    { color: #f78166; border-color: rgba(247,129,102,0.25); background: rgba(247,129,102,0.07); }
-    .kb-tag.default     { color: var(--muted); border-color: var(--border); background: var(--surface); }
-
-    /* ── ANSWER BODY ───────────────────────────────────────── */
-    .result-body {
-      padding: 24px 24px 28px;
-    }
-
-    .question-echo {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: #555;
-      margin-bottom: 16px;
-      padding-bottom: 14px;
-      border-bottom: 1px dashed rgba(255,255,255,0.06);
-      line-height: 1.5;
-    }
-
-    .question-echo em { color: #888; font-style: normal; }
-
-    .answer-text {
-      font-size: 15px;
-      font-weight: 300;
-      line-height: 1.75;
-      color: var(--text);
-      white-space: pre-wrap;
-    }
-
-    /* ── ERROR STATE ───────────────────────────────────────── */
-    .error-card {
-      display: none;
-      background: rgba(227,25,55,0.05);
-      border: 1px solid var(--border-red);
-      border-radius: 10px;
-      padding: 20px 24px;
-      margin-top: 24px;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .error-card.visible { display: block; }
-
-    .error-title {
-      font-family: var(--display);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--red);
-      margin-bottom: 6px;
-    }
-
-    .error-msg {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* ── FOOTER ────────────────────────────────────────────── */
-    footer {
-      margin-top: 64px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .footer-left {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: #444;
-      letter-spacing: 0.06em;
-    }
-
-    .footer-right {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: #333;
-    }
-
-    /* ── DIVIDER ───────────────────────────────────────────── */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 40px 0;
-    }
-
-    /* ── ANIMATIONS ────────────────────────────────────────── */
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
-    }
-
-    /* ── SCROLLBAR ─────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--black); }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-    /* ── RESPONSIVE ────────────────────────────────────────── */
-    @media (max-width: 600px) {
-      header { padding: 32px 0 28px; }
-      h1 { font-size: 1.8rem; }
-      .result-header { flex-direction: column; align-items: flex-start; }
-      button { width: 100%; justify-content: center; }
-      .input-footer { flex-direction: column; align-items: flex-end; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CSWDA QA — Telkom University</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --red: #E31937;
+  --red-dim: rgba(227,25,55,0.12);
+  --font: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+[data-theme="dark"] {
+  --bg:      #0a0a0a;
+  --surface: #111111;
+  --card:    #161616;
+  --line:    rgba(255,255,255,0.08);
+  --line2:   rgba(255,255,255,0.14);
+  --t1:      #ffffff;
+  --t2:      #a0a0a0;
+  --t3:      #555555;
+  --input-bg:#111111;
+}
+
+[data-theme="light"] {
+  --bg:      #f9f9f7;
+  --surface: #f0f0ee;
+  --card:    #ffffff;
+  --line:    rgba(0,0,0,0.08);
+  --line2:   rgba(0,0,0,0.15);
+  --t1:      #0a0a0a;
+  --t2:      #555555;
+  --t3:      #aaaaaa;
+  --input-bg:#ffffff;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  transition: background .2s, color .2s;
+}
+
+.page { max-width: 720px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 0 0;
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 24px;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+
+.logobox {
+  width: 32px; height: 32px;
+  background: var(--red);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.logobox svg { width: 18px; height: 18px; fill: #fff; }
+
+.brand-text { display: flex; flex-direction: column; gap: 1px; }
+
+.brand-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  letter-spacing: -0.01em;
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--t2);
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--t2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  transition: border-color .15s, color .15s, background .15s;
+}
+
+.theme-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); box-shadow: none; }
+.theme-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ── HERO ── */
+.hero { margin-bottom: 40px; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--red);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+
+h1 {
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--t1);
+  margin-bottom: 14px;
+}
+
+h1 em { color: var(--red); font-style: normal; }
+
+.hero-desc {
+  font-size: 14px;
+  color: var(--t2);
+  line-height: 1.7;
+  max-width: 560px;
+  margin-bottom: 20px;
+}
+
+.fund-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.fund-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+
+.fund-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--t2);
+}
+
+.fund-text strong { color: var(--t1); font-weight: 500; }
+
+/* ── DB CAPS (shown in header, always visible as system overview) ── */
+.db-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.db-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  padding: 3px 9px;
+  border-radius: 4px;
+  border: 1px solid var(--line2);
+  color: var(--t3);
+  background: var(--surface);
+  text-transform: uppercase;
+  transition: all .15s;
+}
+
+/* ── INPUT SECTION ── */
+.input-section { margin-bottom: 8px; }
+
+.field-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--t2);
+  margin-bottom: 8px;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  color: var(--t1);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+  padding: 14px 16px;
+  resize: none;
+  min-height: 100px;
+  outline: none;
+  transition: border-color .15s;
+}
+
+textarea::placeholder { color: var(--t3); }
+
+textarea:focus { border-color: var(--red); }
+
+.input-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 12px;
+}
+
+.char-hint {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--t3);
+}
+
+.ask-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: opacity .15s, transform .1s;
+}
+
+.ask-btn:hover:not(:disabled) { opacity: 0.88; }
+.ask-btn:active:not(:disabled) { transform: scale(0.98); }
+.ask-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.ask-btn svg { width: 14px; height: 14px; }
+
+/* ── LOADING ── */
+.loading {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  padding: 36px 0;
+}
+
+.loading.on { display: flex; }
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--line2);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: spin .7s linear infinite;
+}
+
+.loading-label { font-size: 13px; color: var(--t2); }
+.loading-step  { font-family: var(--mono); font-size: 11px; color: var(--t3); }
+
+/* ── RESULT ── */
+.result {
+  display: none;
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 28px;
+  background: var(--card);
+  transition: background .2s;
+}
+
+.result.on { display: block; }
+
+.result-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.result-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t2);
+}
+
+.meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.meta-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line2);
+  color: var(--t2);
+  letter-spacing: 0.04em;
+}
+
+.meta-tag strong { color: var(--t1); font-weight: 500; }
+
+/* ── QUERIED FROM ── */
+.queried-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.queried-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--t3);
+  flex-shrink: 0;
+}
+
+.src-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+  letter-spacing: 0.03em;
+}
+
+.src-MySQL            { color: #60a5fa; border-color: rgba(96,165,250,.2); background: rgba(96,165,250,.07); }
+.src-FAISS            { color: #818cf8; border-color: rgba(129,140,248,.2); background: rgba(129,140,248,.07); }
+.src-InternalWikibase { color: #c084fc; border-color: rgba(192,132,252,.2); background: rgba(192,132,252,.07); }
+.src-MongoDB          { color: #4ade80; border-color: rgba(74,222,128,.2); background: rgba(74,222,128,.07); }
+.src-Wikidata         { color: #fb923c; border-color: rgba(251,146,60,.2); background: rgba(251,146,60,.07); }
+.src-default          { color: var(--t2); border-color: var(--line2); background: var(--surface); }
+
+[data-theme="light"] .src-MySQL            { color: #1d4ed8; border-color: rgba(29,78,216,.2); background: rgba(29,78,216,.06); }
+[data-theme="light"] .src-FAISS            { color: #4338ca; border-color: rgba(67,56,202,.2); background: rgba(67,56,202,.06); }
+[data-theme="light"] .src-InternalWikibase { color: #7e22ce; border-color: rgba(126,34,206,.2); background: rgba(126,34,206,.06); }
+[data-theme="light"] .src-MongoDB          { color: #15803d; border-color: rgba(21,128,61,.2); background: rgba(21,128,61,.06); }
+[data-theme="light"] .src-Wikidata         { color: #c2410c; border-color: rgba(194,65,12,.2); background: rgba(194,65,12,.06); }
+
+/* ── ANSWER BODY ── */
+.answer-body { padding: 20px 20px 24px; }
+
+.q-echo {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--t3);
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--line);
+  line-height: 1.5;
+}
+
+.answer-text {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--t1);
+  white-space: pre-wrap;
+}
+
+/* ── ERROR ── */
+.error {
+  display: none;
+  padding: 16px 18px;
+  border: 1px solid rgba(227,25,55,.3);
+  border-radius: 10px;
+  background: rgba(227,25,55,.05);
+  margin-top: 20px;
+}
+
+.error.on { display: block; }
+
+.error-title { font-size: 13px; font-weight: 500; color: var(--red); margin-bottom: 4px; }
+.error-msg   { font-family: var(--mono); font-size: 12px; color: var(--t2); }
+
+/* ── FOOTER ── */
+footer {
+  margin-top: 60px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+footer span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--t3);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 560px) {
+  h1 { font-size: 24px; }
+  .input-row { flex-direction: column; align-items: stretch; }
+  .ask-btn { justify-content: center; }
+  .topbar { flex-wrap: wrap; gap: 12px; }
+}
+</style>
 </head>
 <body>
+<div class="page">
 
-<div class="ambient"></div>
-
-<div class="shell">
-
-  <!-- ── HEADER ──────────────────────────────────────────── -->
-  <header>
-    <div class="header-top">
-      <div class="logo-mark">
-        <!-- Stylised "T" for Telkom -->
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="3" width="18" height="3.5" rx="1"/>
-          <rect x="10.25" y="3" width="3.5" height="18" rx="1"/>
-        </svg>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logobox">
+        <svg viewBox="0 0 18 18"><rect x="1" y="1" width="16" height="3" rx="1"/><rect x="7.5" y="1" width="3" height="16" rx="1"/></svg>
       </div>
-      <div>
-        <div class="institution-tag">Telkom University · CSWDA</div>
+      <div class="brand-text">
+        <span class="brand-name">CSWDA QA System</span>
+        <span class="brand-sub">Telkom University</span>
       </div>
     </div>
 
-    <h1>CSWDA <span>QA</span> System</h1>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
+      <svg id="themeIcon" viewBox="0 0 16 16" fill="none">
+        <path d="M13.5 9.5a6 6 0 01-7.97-7.97A6.002 6.002 0 108 14a6.002 6.002 0 005.5-4.5z" fill="currentColor"/>
+      </svg>
+      <span id="themeLabel">Light</span>
+    </button>
+  </div>
 
-    <p class="subtitle">
-      A question-answering system that queries multiple knowledge bases and databases simultaneously —
-      MySQL, FAISS vector store, internal Wikibase knowledge graph, MongoDB partnership corpus,
-      and external Wikidata — to answer questions related to CSWDA Telkom University.
+  <div class="hero">
+    <div class="eyebrow"><span class="eyebrow-dot"></span> Sistem Tanya-Jawab Berbasis Pengetahuan</div>
+    <h1>CSWDA <em>Question</em> Answering System</h1>
+    <p class="hero-desc">
+      Platform tanya-jawab multi-sumber untuk CSWDA Telkom University. Setiap pertanyaan dirutekan ke lima basis pengetahuan — data terstruktur, vektor semantik, graf pengetahuan, data kemitraan, dan linked data eksternal — untuk menghasilkan jawaban yang akurat dan terverifikasi.
     </p>
-
-    <div class="db-pills" id="dbPills">
-      <span class="pill" data-db="MySQL">MySQL</span>
-      <span class="pill" data-db="FAISS">FAISS</span>
-      <span class="pill" data-db="InternalWikibase">Wikibase KG</span>
-      <span class="pill" data-db="MongoDB">MongoDB</span>
-      <span class="pill" data-db="Wikidata">Wikidata</span>
+    <div class="fund-badge">
+      <span class="fund-dot"></span>
+      <span class="fund-text">Didukung oleh <strong>Hibah Riset Wikidata 2025</strong></span>
     </div>
-
-    <div class="sponsor-bar">
-      <span class="sponsor-label">Sponsored by</span>
-      <span class="sponsor-name">
-        <span class="wikidata-dot"></span>
-        Wikidata Indonesia
-      </span>
+    <div class="db-overview">
+      <span class="db-chip">MySQL</span>
+      <span class="db-chip">FAISS</span>
+      <span class="db-chip">Wikibase KG</span>
+      <span class="db-chip">MongoDB</span>
+      <span class="db-chip">Wikidata</span>
     </div>
-  </header>
+  </div>
 
-  <!-- ── INPUT ───────────────────────────────────────────── -->
   <div class="input-section">
-    <label class="input-label" for="questionInput">Your Question</label>
-    <div class="input-wrap">
-      <textarea
-        id="questionInput"
-        placeholder="e.g. Siapa dosen yang pernah riset bareng? / What papers has Dr. X published? / What partnerships does Telkom University have?"
-        maxlength="1000"
-        rows="4"
-      ></textarea>
-      <div class="input-footer">
-        <span class="char-count" id="charCount">0 / 1000</span>
-        <button id="submitBtn" onclick="submitQuestion()" disabled>
-          <span class="btn-icon">⟶</span>
-          Ask System
-        </button>
+    <label class="field-label" for="qi">Pertanyaan Anda</label>
+    <textarea id="qi" maxlength="1000" rows="4" placeholder="Contoh: Siapa dosen yang pernah riset bersama? / What papers has Dr. X published?"></textarea>
+    <div class="input-row">
+      <span class="char-hint" id="cc">0 / 1000</span>
+      <button class="ask-btn" id="askBtn" onclick="ask()" disabled>
+        <svg viewBox="0 0 14 14" fill="none"><path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Kirim Pertanyaan
+      </button>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>
+      <div class="loading-label">Mengakses basis pengetahuan…</div>
+      <div class="loading-step" id="lstep">Menentukan database yang relevan</div>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-top">
+      <span class="result-label">Jawaban</span>
+      <div class="meta-row">
+        <div class="meta-tag">⏱ <strong id="latency">—</strong></div>
+        <div class="meta-tag">✦ <strong id="llmc">—</strong> LLM calls</div>
       </div>
     </div>
-  </div>
-
-  <!-- ── LOADING ──────────────────────────────────────────── -->
-  <div class="loading-state" id="loadingState">
-    <div class="loader"></div>
-    <div class="loading-text">Querying knowledge bases…</div>
-    <div class="loading-step" id="loadingStep">Routing to relevant databases</div>
-  </div>
-
-  <!-- ── RESULT ───────────────────────────────────────────── -->
-  <div class="result-card" id="resultCard">
-    <div class="result-header">
-      <span class="result-title">Answer</span>
-      <div class="meta-chips">
-        <div class="meta-chip latency" id="latencyChip">
-          ⏱ <span id="latencyVal">—</span>
-        </div>
-        <div class="meta-chip llm" id="llmChip">
-          ✦ <span id="llmVal">—</span> LLM calls
-        </div>
-      </div>
+    <div class="queried-row" id="queriedRow">
+      <span class="queried-label">Queried From</span>
     </div>
-
-    <div class="kb-used" id="kbUsed">
-      <span class="kb-label">Sources</span>
-      <!-- tags injected by JS -->
-    </div>
-
-    <div class="result-body">
-      <div class="question-echo" id="questionEcho"></div>
-      <div class="answer-text" id="answerText"></div>
+    <div class="answer-body">
+      <div class="q-echo" id="qecho"></div>
+      <div class="answer-text" id="atext"></div>
     </div>
   </div>
 
-  <!-- ── ERROR ────────────────────────────────────────────── -->
-  <div class="error-card" id="errorCard">
-    <div class="error-title">System Error</div>
-    <div class="error-msg" id="errorMsg"></div>
+  <div class="error" id="errCard">
+    <div class="error-title">Kesalahan Sistem</div>
+    <div class="error-msg" id="errMsg"></div>
   </div>
 
-  <!-- ── FOOTER ───────────────────────────────────────────── -->
   <footer>
-    <div class="footer-left">CSWDA QA SYSTEM · TELKOM UNIVERSITY · 2025</div>
-    <div class="footer-right">Powered by Wikidata Indonesia</div>
+    <span>CSWDA QA · Telkom University · 2025</span>
+    <span>Wikidata Indonesia</span>
   </footer>
 
 </div>
-
 <script>
-  // ── CONFIG ─────────────────────────────────────────────────
-  // Replace with your Railway backend URL after deployment
-  const API_BASE = "https://cswda-qa-production.up.railway.app";
+const API_BASE = "https://cswda-qa-production.up.railway.app";
 
-  // ── ELEMENTS ───────────────────────────────────────────────
-  const textarea    = document.getElementById("questionInput");
-  const submitBtn   = document.getElementById("submitBtn");
-  const charCount   = document.getElementById("charCount");
-  const loadingState= document.getElementById("loadingState");
-  const loadingStep = document.getElementById("loadingStep");
-  const resultCard  = document.getElementById("resultCard");
-  const errorCard   = document.getElementById("errorCard");
-  const latencyVal  = document.getElementById("latencyVal");
-  const llmVal      = document.getElementById("llmVal");
-  const kbUsed      = document.getElementById("kbUsed");
-  const questionEcho= document.getElementById("questionEcho");
-  const answerText  = document.getElementById("answerText");
-  const errorMsg    = document.getElementById("errorMsg");
-  const dbPills     = document.querySelectorAll(".pill");
+const qi       = document.getElementById("qi");
+const askBtn   = document.getElementById("askBtn");
+const cc       = document.getElementById("cc");
+const loading  = document.getElementById("loading");
+const lstep    = document.getElementById("lstep");
+const result   = document.getElementById("result");
+const errCard  = document.getElementById("errCard");
+const latency  = document.getElementById("latency");
+const llmc     = document.getElementById("llmc");
+const queriedRow = document.getElementById("queriedRow");
+const qecho    = document.getElementById("qecho");
+const atext    = document.getElementById("atext");
+const errMsg   = document.getElementById("errMsg");
 
-  // ── LOADING STEPS ─────────────────────────────────────────
-  const STEPS = [
-    "Routing to relevant databases…",
-    "Querying MySQL structured data…",
-    "Searching FAISS vector index…",
-    "Traversing Wikibase knowledge graph…",
-    "Fetching partnership corpus…",
-    "Synthesising answer…",
-  ];
-  let stepInterval = null;
+const STEPS = [
+  "Menentukan database yang relevan…",
+  "Mengakses data terstruktur MySQL…",
+  "Mencari indeks vektor FAISS…",
+  "Menelusuri Wikibase knowledge graph…",
+  "Mengambil data kemitraan…",
+  "Mensintesis jawaban…",
+];
+let stepT = null;
 
-  // ── TEXTAREA COUNTER ───────────────────────────────────────
-  textarea.addEventListener("input", () => {
-    const len = textarea.value.length;
-    charCount.textContent = `${len} / 1000`;
-    submitBtn.disabled = len === 0;
-  });
+qi.addEventListener("input", () => {
+  const n = qi.value.length;
+  cc.textContent = `${n} / 1000`;
+  askBtn.disabled = n === 0;
+});
 
-  textarea.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) submitQuestion();
-  });
+qi.addEventListener("keydown", e => { if (e.key==="Enter" && (e.ctrlKey||e.metaKey)) ask(); });
 
-  // ── KB TAG COLOR CLASS ─────────────────────────────────────
-  function kbClass(db) {
-    const map = {
-      "MySQL": "MySQL",
-      "FAISS": "FAISS",
-      "InternalWikibase": "InternalWikibase",
-      "MongoDB": "MongoDB",
-      "Wikidata": "Wikidata",
-    };
-    return map[db] || "default";
+function srcClass(db) {
+  return ({MySQL:"MySQL",FAISS:"FAISS",InternalWikibase:"InternalWikibase",MongoDB:"MongoDB",Wikidata:"Wikidata"})[db] || "default";
+}
+
+function setLoad(on) {
+  loading.classList.toggle("on", on);
+  result.classList.remove("on");
+  errCard.classList.remove("on");
+  askBtn.disabled = on;
+  if (on) {
+    let i = 0;
+    lstep.textContent = STEPS[0];
+    stepT = setInterval(() => { i=(i+1)%STEPS.length; lstep.textContent=STEPS[i]; }, 1800);
+  } else {
+    clearInterval(stepT);
   }
+}
 
-  // ── HIGHLIGHT ACTIVE PILLS ─────────────────────────────────
-  function highlightPills(dbs) {
-    dbPills.forEach(p => {
-      p.classList.toggle("active", dbs.includes(p.dataset.db));
+async function ask() {
+  const q = qi.value.trim();
+  if (!q) return;
+  setLoad(true);
+  try {
+    const res = await fetch(`${API_BASE}/query`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: q }),
     });
-  }
-
-  // ── SHOW / HIDE STATES ─────────────────────────────────────
-  function setLoading(on) {
-    loadingState.classList.toggle("visible", on);
-    resultCard.classList.remove("visible");
-    errorCard.classList.remove("visible");
-    submitBtn.disabled = on;
-
-    if (on) {
-      let i = 0;
-      loadingStep.textContent = STEPS[0];
-      stepInterval = setInterval(() => {
-        i = (i + 1) % STEPS.length;
-        loadingStep.textContent = STEPS[i];
-      }, 1800);
-    } else {
-      clearInterval(stepInterval);
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(e.detail || `HTTP ${res.status}`);
     }
+    const data = await res.json();
+    setLoad(false);
+    render(q, data);
+  } catch(e) {
+    setLoad(false);
+    errCard.classList.add("on");
+    errMsg.textContent = e.message;
   }
+}
 
-  // ── MAIN SUBMIT ────────────────────────────────────────────
-  async function submitQuestion() {
-    const question = textarea.value.trim();
-    if (!question) return;
+function render(q, data) {
+  latency.textContent = `${data.elapsed_seconds}s`;
+  llmc.textContent    = data.llm_calls;
 
-    // Reset UI
-    setLoading(true);
-    highlightPills([]);
+  const dbSet = new Set([
+    ...(data.databases_used || []),
+    ...(data.sources_used   || []),
+    ...(data.kb_used        || []),
+  ]);
+  if (data.wikidata_used || data.external_used) dbSet.add("Wikidata");
 
-    try {
-      const res = await fetch(`${API_BASE}/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
-      });
+  const dbs = [...dbSet];
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: res.statusText }));
-        throw new Error(err.detail || `HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-      setLoading(false);
-      renderResult(question, data);
-
-    } catch (err) {
-      setLoading(false);
-      errorCard.classList.add("visible");
-      errorMsg.textContent = err.message;
-    }
+  let tags;
+  if (dbs.length === 0) {
+    tags = `<span class="src-tag src-default">Tidak ada sumber teridentifikasi</span>`;
+  } else {
+    tags = dbs.map(db => {
+      const label = (db === "Wikidata" && dbs.length === 1) ? "Wikidata External" : db;
+      return `<span class="src-tag src-${srcClass(db)}">${label}</span>`;
+    }).join("");
   }
+  queriedRow.innerHTML = `<span class="queried-label">Queried From</span>${tags}`;
 
-  // ── RENDER RESULT ──────────────────────────────────────────
-  function renderResult(question, data) {
-    // Latency & LLM calls
-    latencyVal.textContent = `${data.elapsed_seconds}s`;
-    llmVal.textContent     = data.llm_calls;
+  qecho.textContent = `Q: ${q}`;
+  atext.textContent = data.answer;
+  result.classList.add("on");
+  result.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
-    // KB tags
-    const dbs = data.databases_used || [];
-    highlightPills(dbs);
+const html = document.documentElement;
+const themeLabel = document.getElementById("themeLabel");
+const themeIcon  = document.getElementById("themeIcon");
 
-    // Rebuild KB section
-    const tagHTML = dbs.length
-      ? dbs.map(db => `<span class="kb-tag ${kbClass(db)}">${db}</span>`).join("")
-      : `<span class="kb-tag default">External only</span>`;
-    kbUsed.innerHTML = `<span class="kb-label">Sources used</span>${tagHTML}`;
+const MOON = `<path d="M13.5 9.5a6 6 0 01-7.97-7.97A6.002 6.002 0 108 14a6.002 6.002 0 005.5-4.5z" fill="currentColor"/>`;
+const SUN  = `<circle cx="8" cy="8" r="2.5" fill="currentColor"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="8" y1="1.5" x2="8" y2="3.5"/><line x1="8" y1="12.5" x2="8" y2="14.5"/><line x1="1.5" y1="8" x2="3.5" y2="8"/><line x1="12.5" y1="8" x2="14.5" y2="8"/><line x1="3.4" y1="3.4" x2="4.8" y2="4.8"/><line x1="11.2" y1="11.2" x2="12.6" y2="12.6"/><line x1="12.6" y1="3.4" x2="11.2" y2="4.8"/><line x1="4.8" y1="11.2" x2="3.4" y2="12.6"/></g>`;
 
-    // Question echo
-    questionEcho.innerHTML = `<em>Q:</em> ${escapeHTML(question)}`;
-
-    // Answer
-    answerText.textContent = data.answer;
-
-    // Show card
-    resultCard.classList.add("visible");
-    resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  // ── UTILS ──────────────────────────────────────────────────
-  function escapeHTML(str) {
-    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  }
+function toggleTheme() {
+  const dark = html.getAttribute("data-theme") === "dark";
+  html.setAttribute("data-theme", dark ? "light" : "dark");
+  themeIcon.innerHTML = dark ? SUN : MOON;
+  themeLabel.textContent = dark ? "Dark" : "Light";
+}
 </script>
 </body>
 </html>
